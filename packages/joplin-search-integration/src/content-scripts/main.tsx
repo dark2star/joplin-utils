@@ -73,7 +73,7 @@ function SearchPanel(props: { plugin: SearchPlugin }) {
     } catch (err) {
       console.error('search notes error', err)
       if (typeof err === 'object' && (err as any).code === 'JoplinWebClipperNotEnabled') {
-        throw new Error(`Please enable joplin webclipper service. check: ${c.baseUrl}/ping`)
+        throw new Error(`Please enable Obsidian RestApi service. check: ${c.baseUrl}/ping`)
       }
       return
     }
@@ -85,7 +85,7 @@ function SearchPanel(props: { plugin: SearchPlugin }) {
   return (
     <div class={'joplin-root'}>
       <style>{css}</style>
-      <h2 class={'joplin-header'}>Joplin search notes</h2>
+      <h2 class={'joplin-header'}>Obsidian search notes</h2>
       <section>
         {state.loading.value && <div>Loading...</div>}
         {state.error.value && <div class={'text-red-500'}>Error: {(state.error.value as Error).message}</div>}

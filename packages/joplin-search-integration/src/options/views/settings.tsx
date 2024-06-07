@@ -31,17 +31,7 @@ function SettingsView() {
         </div>
         <div className="mb-4">
           <label htmlFor="token" className="block text-sm font-bold mb-2">
-            Token(
-            <a
-              href={
-                'https://joplin-utils.rxliuli.com/joplin-search-integration/#what-does-token-port-refer-to-and-where-can-i-find-it'
-              }
-              target={'_blank'}
-              className={'text-blue-500'}
-            >
-              What is token?
-            </a>
-            )
+            Token
           </label>
           <input
             type="password"

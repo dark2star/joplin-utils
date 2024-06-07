@@ -27,33 +27,71 @@ interface NoteData {
   resources: string[]
 }
 
+function extractFileName(markdown) {
+  const regex = /\!\[\[(.*?)\]\]/ // 匹配 ![[...]]
+  const match = markdown.match(regex)
+
+  if (match && match.length > 1) {
+    return match[1] // 返回第一个括号内的内容，即文件名
+  }
+
+  return null // 如果没有匹配到，返回null
+}
+
 async function getNoteData(id: string): Promise<NoteData | undefined> {
   try {
-    const [s, r] = await Promise.all([noteApi.get(id, ['body', 'title']), noteApi.resourcesById(id, ['id'])])
+    const res = await fetch(config.baseUrl + '/vault/' + id, {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + config.token,
+        'Content-type': 'text/markdown',
+      },
+    })
+    const info = await res.text()
     return {
       id: id,
-      title: s.title,
-      content: s.body,
-      resources: r.map((item) => item.id),
+      title: id,
+      content: info,
+      resources: id,
     }
   } catch (e) {}
 }
 
-function renderNoteToHtml(note: NoteData): string {
+async function renderNoteToHtml(note: NoteData): string {
   const root = fromMarkdown(note.content, {
     mdastExtensions: [breaksFromMarkdown()],
   })
+
+  const promises = root.children.flatMap((item) => {
+    if (item.children) {
+      return item.children.map(async (item2) => {
+        if (item2.type === 'text' && item2.value.startsWith('![[')) {
+          console.log(item2.value)
+          const res = await fetch(`${config.baseUrl}/vault/${extractFileName(item2.value)}`, {
+            headers: { Authorization: `Bearer ${config.token}` },
+          })
+          item2.type = 'image'
+          item2.url = URL.createObjectURL(await res.blob())
+        }
+        return []
+      })
+    }
+  })
+
+  await Promise.all(promises)
+  console.log(root)
+
   const f = (item: Image | Link): boolean => item.url.startsWith(':/')
   const images = (selectAll('image', root) as Image[]).filter(f)
   images.forEach((item) => {
     const id = item.url.slice(2)
-    item.url = `${config.baseUrl}/resources/${id}/file?token=${config.token}`
+    item.url = `${config.baseUrl}/vault/${id}`
   })
   const links = (selectAll('link', root) as Link[]).filter(f)
   links.forEach((item) => {
     const id = item.url.slice(2)
     if (note.resources.includes(id)) {
-      item.url = `${config.baseUrl}/resources/${id}/file?token=${config.token}`
+      item.url = `${config.baseUrl}/vault/${id}`
     } else {
       const p = new URLSearchParams(location.search)
       p.set('path', '/note')
@@ -93,7 +131,7 @@ function NoteView() {
       throw new Error('查询笔记失败')
     }
     document.title = s.title
-    const html = renderNoteToHtml(s)
+    const html = await renderNoteToHtml(s)
     $content.current!.innerHTML = html
     return html
   })

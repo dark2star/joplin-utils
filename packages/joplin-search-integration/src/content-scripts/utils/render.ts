@@ -4,7 +4,7 @@ import { warp } from '../../utils/ext'
 
 export function renderList(root: HTMLDivElement, list: SearchNote[]) {
   const html = `<div>
-  <h2 class="joplin-header">Joplin search notes</h2>
+  <h2 class="joplin-header">Obsidian search notes</h2>
   <ul>
     ${list.map((item) => `<li><a href="javascript:void(0)" data-id="${item.id}">${item.title}</a></li>`).join('')}
   </ul>

@@ -1,7 +1,7 @@
 {
-  "name": "Joplin Search Integration",
-  "version": "0.7.0",
-  "description": "When using search, related Joplin notes are also displayed in the search results.",
+  "name": "Obsidian Search Integration",
+  "version": "0.1.0",
+  "description": "When using search, related Obsidian notes are also displayed in the search results.",
   "manifest_version": 3,
   "background": {
     "service_worker": "src/background.ts"
@@ -12,7 +12,7 @@
       "js": ["src/content-scripts/main.tsx"]
     }
   ],
-  "host_permissions": ["http://localhost:27583/*", "http://localhost:41184/*"],
+  "host_permissions": ["http://localhost:27583/*", "http://localhost:27123/*"],
   "permissions": ["storage"],
   "icons": {
     "16": "src/assets/16.png",

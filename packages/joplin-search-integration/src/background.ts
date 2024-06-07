@@ -1,4 +1,4 @@
-import { NoteProperties, TypeEnum, config, joplinApi, searchApi } from 'joplin-api'
+import { NoteProperties, TypeEnum, config } from 'joplin-api'
 import { LocalConfig } from './options/utils/loadConfig'
 import { trimTitleStart } from './content-scripts/utils/trim'
 import Browser from 'webextension-polyfill'
@@ -23,28 +23,24 @@ register<BackChannel>({
   },
   async search(keyword) {
     const c = ((await Browser.storage.local.get(['baseUrl', 'token'])) ?? {}) as LocalConfig
-    config.baseUrl = c.baseUrl ?? 'http://127.0.0.1:41184'
+    config.baseUrl = c.baseUrl ?? 'http://127.0.0.1:27123'
     config.token = c.token!
     try {
-      const res = await searchApi.search({
-        query: keyword,
-        type: TypeEnum.Note,
-        limit: 10,
-        fields: ['id', 'title'],
-        order_by: 'user_updated_time',
+      const res = await fetch(config.baseUrl + '/search/simple/?contextLength=100&query=' + keyword, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + config.token,
+        },
       })
-      return res.items.map((item) => ({
+      const info = await res.json()
+      return info.map((item) => ({
         ...item,
-        title: trimTitleStart(item.title),
+        title: item.filename,
+        id: item.filename,
       }))
     } catch (err) {
-      try {
-        await joplinApi.ping()
-        throw err
-      } catch (err) {
-        throw {
-          code: 'JoplinWebClipperNotEnabled',
-        }
+      throw {
+        code: 'Obsidian API NotEnabled',
       }
     }
   },

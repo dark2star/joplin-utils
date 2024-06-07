@@ -8,7 +8,7 @@ export interface LocalConfig {
 
 export function getDefault(): LocalConfig {
   return {
-    baseUrl: 'http://127.0.0.1:41184',
+    baseUrl: 'http://127.0.0.1:27123',
     theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
   }
 }
